@@ -1,0 +1,43 @@
+﻿apiVersion: v1
+kind: Pod
+metadata:
+  name: api-test-client
+spec:
+  containers:
+  - name: api-test-client-container
+    image: curlimages/curl:latest
+    command: ["/bin/sh"]
+    args: ["-c", "while true; do curl http://127.0.0.1/WeatherForecast; done"]
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: load-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: load-test
+  template:
+    metadata:
+      labels:
+        app: load-test
+    spec:
+      containers:
+      - name: load-test-container
+        image: busybox:latest
+        command: ["/bin/sh"]
+        args: ["-c", "while true; done"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: load-test-service
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+  selector:
+    app: load-test
+  type: NodePort
